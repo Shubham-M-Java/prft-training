@@ -1,0 +1,297 @@
+<!-- Header -->
+<div class="header">
+  <h1>🛒 Shopping <span>Orchestrator AI</span></h1>
+  <div style="color: white; font-size: 0.9rem; opacity: 0.8;">
+    Powered by 4 Specialized AI Agents
+  </div>
+</div>
+
+<!-- Search History -->
+<div class="history-section" *ngIf="history.length > 0 && !isLoading && !response">
+  <h3>🕐 Recent Searches</h3>
+  <div class="history-list">
+    <div class="history-item" *ngFor="let item of history" (click)="onHistoryClick(item)">
+      {{ item.productCategory }} · ₹{{ item.budget | number }} · {{ item.preferences }}
+    </div>
+  </div>
+</div>
+
+<!-- Search Form -->
+<div class="search-section" *ngIf="!isLoading && !response">
+  <h2>🔍 Find Your Perfect Product</h2>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Product Type *</label>
+      <input type="text" [(ngModel)]="request.productCategory"
+             placeholder="e.g., Smartphone, Laptop, Headphones"
+             (keyup.enter)="onSearch()">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select [(ngModel)]="selectedCategory">
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Budget (₹) *</label>
+      <input type="number" [(ngModel)]="request.budget"
+             placeholder="e.g., 50000"
+             min="0">
+    </div>
+    <div class="form-group">
+      <label>Preferences</label>
+      <input type="text" [(ngModel)]="request.preferences"
+             placeholder="e.g., camera quality, battery life, gaming">
+    </div>
+  </div>
+
+  <button class="btn-search" (click)="onSearch()"
+          [disabled]="!request.productCategory || !request.budget">
+    🚀 Find Best Products
+  </button>
+</div>
+
+<!-- Loading -->
+<div class="loading-section" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>AI Agents are working on your request...</p>
+  <div class="agent-steps">
+    <div class="agent-step" *ngFor="let step of stepLabels; let i = index"
+         [class.active]="i <= activeStep">
+      {{ step }}
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="error-section" *ngIf="error && !isLoading">
+  <h3>⚠️ Something went wrong</h3>
+  <p>{{ error }}</p>
+  <button class="btn-retry" (click)="onReset()">Try Again</button>
+</div>
+
+<!-- Results -->
+<div class="results-section" *ngIf="response && !isLoading">
+
+  <!-- Back Button -->
+  <div style="margin-bottom: 20px;">
+    <button class="btn-retry" (click)="onReset()" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white;">
+      ← New Search
+    </button>
+    <span style="color: white; margin-left: 15px; opacity: 0.8; font-size: 0.9rem;">
+      Status: {{ response.status }}
+    </span>
+  </div>
+
+  <!-- User Requirement -->
+  <div class="result-card">
+    <h3>🔍 User Requirement</h3>
+    <div class="requirement-grid">
+      <div class="req-item">
+        <div class="label">Product</div>
+        <div class="value">{{ response.productCategory }}</div>
+      </div>
+      <div class="req-item">
+        <div class="label">Budget</div>
+        <div class="value">{{ formatPrice(response.budget) }}</div>
+      </div>
+      <div class="req-item">
+        <div class="label">Preferences</div>
+        <div class="value">{{ response.preferences || 'None specified' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Options Found -->
+  <div class="result-card">
+    <h3>📦 Top Options Found
+      <span style="font-size: 0.85rem; font-weight: 400; color: #888;">
+        ({{ response.topOptionsFound?.length || 0 }} products researched)
+      </span>
+    </h3>
+    <div class="products-grid">
+      <div class="product-card"
+           *ngFor="let product of response.topOptionsFound"
+           [class.best]="product.id === response.finalRecommendation?.bestProduct?.id">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-brand">{{ product.brand }}</div>
+          </div>
+          <span class="badge badge-best" *ngIf="product.id === response.finalRecommendation?.bestProduct?.id">
+            🏆 Best
+          </span>
+        </div>
+        <div class="product-price">{{ product.priceRange || formatPrice(product.price) }}</div>
+        <div class="product-rating">
+          <span class="stars">{{ getStars(product.rating) }}</span>
+          <span class="rating-value">{{ product.rating }}/5</span>
+        </div>
+        <ul class="product-features">
+          <li *ngFor="let feature of product.keyFeatures?.slice(0, 4)">{{ feature }}</li>
+        </ul>
+        <div style="margin-top: 10px; font-size: 0.8rem; color: #888; font-style: italic;" *ngIf="product.notableHighlights">
+          {{ product.notableHighlights }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Summary -->
+  <div class="result-card" *ngIf="response.comparisonSummary">
+    <h3>⚖️ Comparison Summary</h3>
+
+    <!-- Feature Comparison Table -->
+    <div *ngIf="response.comparisonSummary.featureComparison">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th *ngFor="let product of response.topOptionsFound?.slice(0, 4)">
+              {{ product.name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let key of getFeatureKeys(response.comparisonSummary.featureComparison)">
+            <td><strong>{{ key }}</strong></td>
+            <td *ngFor="let val of response.comparisonSummary.featureComparison[key]">
+              {{ val }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pros & Cons -->
+    <div *ngIf="response.comparisonSummary.prosAndCons">
+      <div *ngFor="let key of getProsConsKeys(response.comparisonSummary.prosAndCons)" style="margin-top: 15px;">
+        <h4 style="font-size: 0.95rem; color: #555; margin-bottom: 8px;">{{ key }}</h4>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>✅ Pros</h4>
+            <ul>
+              <li *ngFor="let item of response.comparisonSummary.prosAndCons[key]?.slice(0, 3)">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Cons</h4>
+            <ul>
+              <li>Limited availability in some regions</li>
+              <li>Price may vary by retailer</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="budget-insight" *ngIf="response.comparisonSummary.summary" style="margin-top: 15px;">
+      📊 {{ response.comparisonSummary.summary }}
+    </div>
+  </div>
+
+  <!-- Budget Analysis -->
+  <div class="result-card" *ngIf="response.budgetAnalysis">
+    <h3>💰 Budget Analysis</h3>
+    <div class="budget-insight">
+      {{ response.budgetAnalysis.costVsValueInsight }}
+    </div>
+    <div class="products-grid" *ngIf="response.budgetAnalysis.productsWithinBudget?.length">
+      <div class="product-card"
+           *ngFor="let product of response.budgetAnalysis.productsWithinBudget?.slice(0, 3)"
+           [class.best]="product.id === response.budgetAnalysis.bestValueProduct?.id">
+        <div class="product-name">{{ product.name }}</div>
+        <div class="product-brand">{{ product.brand }}</div>
+        <div class="product-price">{{ formatPrice(product.price) }}</div>
+        <div class="product-rating">
+          <span class="stars">{{ getStars(product.rating) }}</span>
+          <span class="rating-value">{{ product.rating }}/5</span>
+        </div>
+        <span class="badge badge-best" *ngIf="product.id === response.budgetAnalysis.bestValueProduct?.id">
+          💎 Best Value
+        </span>
+      </div>
+    </div>
+    <div *ngIf="response.budgetAnalysis.cheaperAlternatives?.length" style="margin-top: 20px;">
+      <h4 style="color: #555; margin-bottom: 12px;">💡 Budget-Friendly Alternatives</h4>
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let product of response.budgetAnalysis.cheaperAlternatives?.slice(0, 2)">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-price">{{ formatPrice(product.price) }}</div>
+          <div class="product-rating">
+            <span class="stars">{{ getStars(product.rating) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Recommendation -->
+  <div class="result-card" *ngIf="response.finalRecommendation">
+    <h3>🏆 Final Recommendation</h3>
+
+    <div class="recommendation-hero" *ngIf="response.finalRecommendation.bestProduct">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+        <div>
+          <h4>{{ response.finalRecommendation.bestProduct.name }}</h4>
+          <div class="brand">{{ response.finalRecommendation.bestProduct.brand }}</div>
+          <div class="price">
+            {{ response.finalRecommendation.bestProduct.priceRange ||
+               formatPrice(response.finalRecommendation.bestProduct.price) }}
+          </div>
+          <div class="product-rating" style="margin-bottom: 15px;">
+            <span class="stars" style="color: #ffd700;">
+              {{ getStars(response.finalRecommendation.bestProduct.rating) }}
+            </span>
+            <span style="color: white; font-weight: 600;">
+              {{ response.finalRecommendation.bestProduct.rating }}/5
+            </span>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px; min-width: 200px;">
+          <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px;">KEY FEATURES</div>
+          <ul style="list-style: none; color: white; padding: 0;">
+            <li *ngFor="let f of response.finalRecommendation.bestProduct.keyFeatures?.slice(0, 4)"
+                style="padding: 3px 0; font-size: 0.85rem;">
+              ✓ {{ f }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="reason">
+        <strong>Why this is the best choice:</strong><br>
+        {{ response.finalRecommendation.reasonForRecommendation }}
+      </div>
+    </div>
+
+    <div class="final-decision">
+      {{ response.finalRecommendation.finalDecision }}
+    </div>
+
+    <!-- Alternatives -->
+    <div *ngIf="response.finalRecommendation.alternativeOptions?.length" style="margin-top: 20px;">
+      <h4 style="color: #555; margin-bottom: 12px;">🔄 Alternative Options</h4>
+      <div class="products-grid">
+        <div class="product-card"
+             *ngFor="let product of response.finalRecommendation.alternativeOptions">
+          <span class="badge badge-alt" style="margin-bottom: 8px; display: inline-block;">Alternative</span>
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-brand">{{ product.brand }}</div>
+          <div class="product-price">{{ product.priceRange || formatPrice(product.price) }}</div>
+          <div class="product-rating">
+            <span class="stars">{{ getStars(product.rating) }}</span>
+            <span class="rating-value">{{ product.rating }}/5</span>
+          </div>
+          <ul class="product-features">
+            <li *ngFor="let f of product.keyFeatures?.slice(0, 3)">{{ f }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

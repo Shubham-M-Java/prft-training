@@ -1,0 +1,419 @@
+{
+  "info": {
+    "name": "Shopping Orchestrator AI - Complete API Collection",
+    "description": "Full API collection for the Shopping Orchestrator AI microservices system.\n\nServices:\n- Eureka Server: http://localhost:8761\n- API Gateway: http://localhost:8080\n- Orchestrator: http://localhost:8081\n- Product Research Agent: http://localhost:8082\n- Comparison Agent: http://localhost:8083\n- Budget Agent: http://localhost:8084\n- Recommendation Agent: http://localhost:8085\n\nStart order:\n1. Eureka Server (8761)\n2. All agents (8082-8085)\n3. Orchestrator (8081)\n4. API Gateway (8080)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway_url", "value": "http://localhost:8080" },
+    { "key": "orchestrator_url", "value": "http://localhost:8081" },
+    { "key": "research_url", "value": "http://localhost:8082" },
+    { "key": "comparison_url", "value": "http://localhost:8083" },
+    { "key": "budget_url", "value": "http://localhost:8084" },
+    { "key": "recommendation_url", "value": "http://localhost:8085" }
+  ],
+  "item": [
+    {
+      "name": "1. Health Checks",
+      "item": [
+        {
+          "name": "Orchestrator Health",
+          "request": {
+            "method": "GET",
+            "url": "{{orchestrator_url}}/api/orchestrator/health",
+            "description": "Check if Orchestrator service is running"
+          }
+        },
+        {
+          "name": "Product Research Health",
+          "request": {
+            "method": "GET",
+            "url": "{{research_url}}/api/research/health",
+            "description": "Check if Product Research Agent is running"
+          }
+        },
+        {
+          "name": "Comparison Agent Health",
+          "request": {
+            "method": "GET",
+            "url": "{{comparison_url}}/api/comparison/health",
+            "description": "Check if Comparison Agent is running"
+          }
+        },
+        {
+          "name": "Budget Agent Health",
+          "request": {
+            "method": "GET",
+            "url": "{{budget_url}}/api/budget/health",
+            "description": "Check if Budget Agent is running"
+          }
+        },
+        {
+          "name": "Recommendation Agent Health",
+          "request": {
+            "method": "GET",
+            "url": "{{recommendation_url}}/api/recommendation/health",
+            "description": "Check if Recommendation Agent is running"
+          }
+        },
+        {
+          "name": "API Gateway - Orchestrator Health",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/api/orchestrator/health",
+            "description": "Check health via API Gateway"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Main Orchestrator - Search",
+      "item": [
+        {
+          "name": "Search - Smartphone under 30000",
+          "request": {
+            "method": "POST",
+            "url": "{{orchestrator_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Smartphone\",\n  \"budget\": 30000,\n  \"preferences\": \"camera quality, battery life\",\n  \"category\": \"Smartphones\"\n}"
+            },
+            "description": "Main orchestrator endpoint - searches for smartphones under ₹30,000 with camera and battery preferences"
+          }
+        },
+        {
+          "name": "Search - Laptop under 60000",
+          "request": {
+            "method": "POST",
+            "url": "{{orchestrator_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Laptop\",\n  \"budget\": 60000,\n  \"preferences\": \"programming, lightweight, long battery\",\n  \"category\": \"Laptops\"\n}"
+            },
+            "description": "Search for laptops under ₹60,000 for programming use"
+          }
+        },
+        {
+          "name": "Search - Wireless Headphones under 5000",
+          "request": {
+            "method": "POST",
+            "url": "{{orchestrator_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Wireless Headphones\",\n  \"budget\": 5000,\n  \"preferences\": \"noise cancellation, bass\",\n  \"category\": \"Audio\"\n}"
+            },
+            "description": "Search for wireless headphones under ₹5,000"
+          }
+        },
+        {
+          "name": "Search - Gaming Laptop under 80000",
+          "request": {
+            "method": "POST",
+            "url": "{{orchestrator_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Gaming Laptop\",\n  \"budget\": 80000,\n  \"preferences\": \"high refresh rate, dedicated GPU, RGB\",\n  \"category\": \"Laptops\"\n}"
+            },
+            "description": "Search for gaming laptops under ₹80,000"
+          }
+        },
+        {
+          "name": "Search - Smart TV under 40000",
+          "request": {
+            "method": "POST",
+            "url": "{{orchestrator_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Smart TV\",\n  \"budget\": 40000,\n  \"preferences\": \"4K, HDR, Android TV\",\n  \"category\": \"TVs\"\n}"
+            },
+            "description": "Search for Smart TVs under ₹40,000"
+          }
+        },
+        {
+          "name": "Search via API Gateway",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Tablet\",\n  \"budget\": 25000,\n  \"preferences\": \"drawing, stylus support\",\n  \"category\": \"Tablets\"\n}"
+            },
+            "description": "Search via API Gateway (port 8080) - routes to orchestrator"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Search History",
+      "item": [
+        {
+          "name": "Get All Search History",
+          "request": {
+            "method": "GET",
+            "url": "{{orchestrator_url}}/api/orchestrator/history",
+            "description": "Get all past search history (user preferences memory)"
+          }
+        },
+        {
+          "name": "Get History by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{orchestrator_url}}/api/orchestrator/history/1",
+            "description": "Get specific search history by ID"
+          }
+        },
+        {
+          "name": "Get History via Gateway",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/api/orchestrator/history",
+            "description": "Get search history via API Gateway"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Product Research Agent",
+      "item": [
+        {
+          "name": "Research Products - Smartphone",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{research_url}}/api/research/products?productType=Smartphone&category=Smartphones&budget=30000",
+              "query": [
+                { "key": "productType", "value": "Smartphone" },
+                { "key": "category", "value": "Smartphones" },
+                { "key": "budget", "value": "30000" }
+              ]
+            },
+            "description": "Directly call Product Research Agent to find smartphones"
+          }
+        },
+        {
+          "name": "Research Products - Laptop",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{research_url}}/api/research/products?productType=Laptop&category=Laptops&budget=60000",
+              "query": [
+                { "key": "productType", "value": "Laptop" },
+                { "key": "category", "value": "Laptops" },
+                { "key": "budget", "value": "60000" }
+              ]
+            },
+            "description": "Directly call Product Research Agent to find laptops"
+          }
+        },
+        {
+          "name": "Research Products - Headphones",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{research_url}}/api/research/products?productType=Headphones&category=Audio&budget=5000",
+              "query": [
+                { "key": "productType", "value": "Headphones" },
+                { "key": "category", "value": "Audio" },
+                { "key": "budget", "value": "5000" }
+              ]
+            },
+            "description": "Directly call Product Research Agent to find headphones"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Comparison Agent",
+      "item": [
+        {
+          "name": "Compare Products",
+          "request": {
+            "method": "POST",
+            "url": "{{comparison_url}}/api/comparison/compare",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"1\",\n    \"name\": \"Samsung Galaxy S23\",\n    \"brand\": \"Samsung\",\n    \"category\": \"Smartphones\",\n    \"price\": 29999,\n    \"priceRange\": \"₹25,000 - ₹35,000\",\n    \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\", \"Snapdragon 8 Gen 2\", \"6.1 inch AMOLED\"],\n    \"notableHighlights\": \"Best camera in mid-range\",\n    \"rating\": 4.5\n  },\n  {\n    \"id\": \"2\",\n    \"name\": \"OnePlus 11R\",\n    \"brand\": \"OnePlus\",\n    \"category\": \"Smartphones\",\n    \"price\": 27999,\n    \"priceRange\": \"₹25,000 - ₹30,000\",\n    \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\", \"Snapdragon 8+ Gen 1\", \"6.7 inch AMOLED\"],\n    \"notableHighlights\": \"Best performance in segment\",\n    \"rating\": 4.4\n  },\n  {\n    \"id\": \"3\",\n    \"name\": \"Pixel 7a\",\n    \"brand\": \"Google\",\n    \"category\": \"Smartphones\",\n    \"price\": 28999,\n    \"priceRange\": \"₹26,000 - ₹32,000\",\n    \"keyFeatures\": [\"64MP Camera\", \"4385mAh Battery\", \"Google Tensor G2\", \"6.1 inch OLED\"],\n    \"notableHighlights\": \"Best AI camera features\",\n    \"rating\": 4.6\n  }\n]"
+            },
+            "description": "Compare multiple products - returns feature comparison and pros/cons"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Budget Agent",
+      "item": [
+        {
+          "name": "Analyze Budget - Smartphones",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{budget_url}}/api/budget/analyze?budget=30000",
+              "query": [
+                { "key": "budget", "value": "30000" }
+              ]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"1\",\n    \"name\": \"Samsung Galaxy S23\",\n    \"brand\": \"Samsung\",\n    \"category\": \"Smartphones\",\n    \"price\": 29999,\n    \"priceRange\": \"₹25,000 - ₹35,000\",\n    \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\"],\n    \"notableHighlights\": \"Best camera in mid-range\",\n    \"rating\": 4.5\n  },\n  {\n    \"id\": \"2\",\n    \"name\": \"OnePlus 11R\",\n    \"brand\": \"OnePlus\",\n    \"category\": \"Smartphones\",\n    \"price\": 27999,\n    \"priceRange\": \"₹25,000 - ₹30,000\",\n    \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\"],\n    \"notableHighlights\": \"Best performance\",\n    \"rating\": 4.4\n  },\n  {\n    \"id\": \"4\",\n    \"name\": \"Redmi Note 12 Pro\",\n    \"brand\": \"Xiaomi\",\n    \"category\": \"Smartphones\",\n    \"price\": 19999,\n    \"priceRange\": \"₹18,000 - ₹22,000\",\n    \"keyFeatures\": [\"200MP Camera\", \"5000mAh Battery\"],\n    \"notableHighlights\": \"Best value for money\",\n    \"rating\": 4.2\n  }\n]"
+            },
+            "description": "Analyze budget - filters products within budget and finds best value"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Recommendation Agent",
+      "item": [
+        {
+          "name": "Get Recommendation",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{recommendation_url}}/api/recommendation/recommend?budget=30000&preferences=camera",
+              "query": [
+                { "key": "budget", "value": "30000" },
+                { "key": "preferences", "value": "camera" }
+              ]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"products\": [\n    {\n      \"id\": \"1\",\n      \"name\": \"Samsung Galaxy S23\",\n      \"brand\": \"Samsung\",\n      \"category\": \"Smartphones\",\n      \"price\": 29999,\n      \"priceRange\": \"₹25,000 - ₹35,000\",\n      \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\", \"Snapdragon 8 Gen 2\"],\n      \"notableHighlights\": \"Best camera in mid-range\",\n      \"rating\": 4.5\n    },\n    {\n      \"id\": \"2\",\n      \"name\": \"OnePlus 11R\",\n      \"brand\": \"OnePlus\",\n      \"category\": \"Smartphones\",\n      \"price\": 27999,\n      \"priceRange\": \"₹25,000 - ₹30,000\",\n      \"keyFeatures\": [\"50MP Camera\", \"5000mAh Battery\", \"Snapdragon 8+ Gen 1\"],\n      \"notableHighlights\": \"Best performance\",\n      \"rating\": 4.4\n    },\n    {\n      \"id\": \"3\",\n      \"name\": \"Pixel 7a\",\n      \"brand\": \"Google\",\n      \"category\": \"Smartphones\",\n      \"price\": 28999,\n      \"priceRange\": \"₹26,000 - ₹32,000\",\n      \"keyFeatures\": [\"64MP Camera\", \"4385mAh Battery\", \"Google Tensor G2\"],\n      \"notableHighlights\": \"Best AI camera features\",\n      \"rating\": 4.6\n    }\n  ],\n  \"featureComparison\": {\n    \"Camera\": [\"50MP\", \"50MP\", \"64MP\"],\n    \"Battery\": [\"5000mAh\", \"5000mAh\", \"4385mAh\"],\n    \"Processor\": [\"Snapdragon 8 Gen 2\", \"Snapdragon 8+ Gen 1\", \"Tensor G2\"]\n  },\n  \"prosAndCons\": {\n    \"Samsung Galaxy S23\": [\"Excellent camera\", \"Premium build\", \"Regular updates\"],\n    \"OnePlus 11R\": [\"Fast charging\", \"Smooth performance\", \"Good value\"],\n    \"Pixel 7a\": [\"Best AI features\", \"Pure Android\", \"Guaranteed updates\"]\n  },\n  \"summary\": \"All three phones offer excellent value in the ₹28,000-₹30,000 range\"\n}"
+            },
+            "description": "Get final recommendation based on comparison results"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Complete Flow - End to End",
+      "item": [
+        {
+          "name": "STEP 1 - Search Smartphone (Full Flow)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.recommendationResult) {",
+                  "  pm.environment.set('best_product', jsonData.recommendationResult.bestProduct.name);",
+                  "  console.log('Best Product:', jsonData.recommendationResult.bestProduct.name);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Smartphone\",\n  \"budget\": 30000,\n  \"preferences\": \"camera quality, battery life\",\n  \"category\": \"Smartphones\"\n}"
+            },
+            "description": "STEP 1: Full end-to-end flow via API Gateway.\n\nThis single call:\n1. Orchestrator receives request\n2. Calls Product Research Agent → finds products\n3. Calls Comparison Agent → compares products\n4. Calls Budget Agent → filters by budget\n5. Calls Recommendation Agent → picks best\n6. Returns complete structured response\n\nExpected Response Structure:\n- userRequirement: {productType, budget, preferences, category}\n- researchedProducts: [array of products]\n- comparisonResult: {featureComparison, prosAndCons, summary}\n- budgetAnalysis: {productsWithinBudget, cheaperAlternatives, costVsValueInsight}\n- recommendationResult: {bestProduct, reasonForRecommendation, alternativeOptions, finalDecision}\n- processingTimeMs: number\n- status: 'SUCCESS'"
+          }
+        },
+        {
+          "name": "STEP 2 - View Search History",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/api/orchestrator/history",
+            "description": "STEP 2: After searching, view the saved search history (user preferences memory feature)"
+          }
+        },
+        {
+          "name": "STEP 3 - Search Laptop (Full Flow)",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Laptop\",\n  \"budget\": 55000,\n  \"preferences\": \"lightweight, programming, long battery\",\n  \"category\": \"Laptops\"\n}"
+            },
+            "description": "STEP 3: Search for laptops - demonstrates the system works for different product categories"
+          }
+        },
+        {
+          "name": "STEP 4 - Search Headphones (Full Flow)",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}/api/orchestrator/search",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productType\": \"Wireless Headphones\",\n  \"budget\": 3000,\n  \"preferences\": \"noise cancellation\",\n  \"category\": \"Audio\"\n}"
+            },
+            "description": "STEP 4: Search for headphones - tests budget optimization with lower budget"
+          }
+        },
+        {
+          "name": "STEP 5 - View Updated History",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}/api/orchestrator/history",
+            "description": "STEP 5: View updated history showing all 3 searches saved"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Eureka Service Registry",
+      "item": [
+        {
+          "name": "Eureka Dashboard (HTML)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8761",
+            "description": "Open Eureka dashboard to see all registered services"
+          }
+        },
+        {
+          "name": "Eureka Apps (JSON)",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8761/eureka/apps",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "description": "Get all registered services in JSON format"
+          }
+        }
+      ]
+    }
+  ]
+}
