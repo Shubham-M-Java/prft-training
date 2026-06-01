@@ -1,0 +1,6 @@
+@echo off
+cd /d c:\prft-training\shopping-orchestrator\frontend
+echo Installing dependencies...
+npm install
+echo Starting Angular dev server...
+npm start

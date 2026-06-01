@@ -1,0 +1,551 @@
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<div class="header">
+  <div class="header-logo">
+    <div class="header-logo-icon">🛒</div>
+    <div>
+      <h1>Shopping <span>Orchestrator AI</span></h1>
+      <div class="header-subtitle">Powered by 4 Specialized AI Agents</div>
+    </div>
+  </div>
+  <div class="header-badges">
+    <div class="header-badge">
+      <span class="dot"></span>
+      4 AI Agents Active
+    </div>
+    <div class="header-badge">
+      🇮🇳 India Market
+    </div>
+    <div class="header-badge">
+      ⚡ Real-time Analysis
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SEARCH STATE
+     ============================================================ -->
+<div *ngIf="!isLoading && !response">
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <h2 class="hero-title">
+      Find Your <span class="gradient-text">Perfect Product</span><br>
+      with AI Intelligence
+    </h2>
+    <p class="hero-subtitle">
+      Our 4 specialized AI agents research, compare, analyze budgets &amp; recommend the best products for you
+    </p>
+
+    <!-- Agent Pills -->
+    <div class="agent-pills">
+      <div class="agent-pill">
+        <div class="agent-pill-icon">🔍</div>
+        Product Research Agent
+      </div>
+      <div class="agent-pill">
+        <div class="agent-pill-icon">⚖️</div>
+        Comparison Agent
+      </div>
+      <div class="agent-pill">
+        <div class="agent-pill-icon">💰</div>
+        Budget Analysis Agent
+      </div>
+      <div class="agent-pill">
+        <div class="agent-pill-icon">🏆</div>
+        Recommendation Agent
+      </div>
+    </div>
+  </div>
+
+  <!-- Search History -->
+  <div class="history-section" *ngIf="history.length > 0">
+    <h3>🕐 Recent Searches</h3>
+    <div class="history-list">
+      <div class="history-item" *ngFor="let item of history" (click)="onHistoryClick(item)">
+        {{ item.productCategory }} · ₹{{ item.budget | number }} · {{ item.preferences }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Form -->
+  <div class="search-section">
+    <h2>🔍 What are you looking for?</h2>
+    <p class="search-desc">Tell us your requirements and our AI agents will find the best options for you</p>
+
+    <!-- Quick Category Chips -->
+    <div class="quick-categories">
+      <span class="quick-cat" *ngFor="let cat of quickCategories"
+            [class.active]="request.productCategory === cat"
+            (click)="setCategory(cat)">{{ cat }}</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label><span class="label-icon">📦</span> Product Type *</label>
+        <input type="text" [(ngModel)]="request.productCategory"
+               placeholder="e.g., Gaming Laptop, iPhone, Headphones"
+               (keyup.enter)="onSearch()">
+      </div>
+      <div class="form-group">
+        <label><span class="label-icon">💰</span> Budget (₹) *</label>
+        <input type="number" [(ngModel)]="request.budget"
+               placeholder="e.g., 50000"
+               min="0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="label-icon">✨</span> Preferences</label>
+      <input type="text" [(ngModel)]="request.preferences"
+             placeholder="e.g., gaming performance, long battery life, best camera, lightweight">
+    </div>
+
+    <button class="btn-search" (click)="onSearch()"
+            [disabled]="!request.productCategory || !request.budget">
+      🚀 &nbsp; Find Best Products with AI
+    </button>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     LOADING STATE
+     ============================================================ -->
+<div class="loading-section" *ngIf="isLoading">
+  <div class="loading-orb">
+    <div class="loading-orb-inner">🤖</div>
+    <div class="loading-ring"></div>
+  </div>
+  <h3>AI Agents are working...</h3>
+  <p>Analyzing thousands of products to find the best match for you</p>
+  <div class="agent-steps">
+    <div class="agent-step" *ngFor="let step of stepLabels; let i = index"
+         [class.active]="i <= activeStep">
+      <span class="step-dot"></span>
+      {{ step }}
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ERROR STATE
+     ============================================================ -->
+<div class="error-section" *ngIf="error && !isLoading">
+  <div class="error-icon">⚠️</div>
+  <h3>Something went wrong</h3>
+  <p>{{ error }}</p>
+  <p style="font-size:0.82rem; color:#aaa; margin-top:6px;">
+    Please ensure all backend services are running on ports 8081–8085 &amp; 8090.
+  </p>
+  <button class="btn-retry" (click)="onReset()">← Try Again</button>
+</div>
+
+<!-- ============================================================
+     RESULTS STATE
+     ============================================================ -->
+<div class="results-section" *ngIf="response && !isLoading">
+
+  <!-- Top Bar -->
+  <div class="results-topbar">
+    <button class="btn-new-search" (click)="onReset()">
+      ← New Search
+    </button>
+    <div class="status-badge" [class.success]="response.status === 'SUCCESS'" [class.error]="response.status !== 'SUCCESS'">
+      <span>{{ response.status === 'SUCCESS' ? '✅' : '❌' }}</span>
+      {{ response.status === 'SUCCESS' ? 'Analysis Complete' : 'Error Occurred' }}
+    </div>
+  </div>
+
+  <!-- 1. User Requirement Card -->
+  <div class="result-card">
+    <h3>
+      <span class="card-icon" style="background: linear-gradient(135deg, #e8f4fd, #dbeeff);">🔍</span>
+      Your Search Requirements
+    </h3>
+    <div class="requirement-grid">
+      <div class="req-item">
+        <div class="req-icon">📦</div>
+        <div class="label">Product</div>
+        <div class="value">{{ response.productCategory }}</div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">💰</div>
+        <div class="label">Budget</div>
+        <div class="value">{{ formatPrice(response.budget) }}</div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">✨</div>
+        <div class="label">Preferences</div>
+        <div class="value">{{ response.preferences || 'None specified' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Top Options Found -->
+  <div class="result-card">
+    <h3>
+      <span class="card-icon" style="background: linear-gradient(135deg, #f0fff4, #e8f5e9);">📦</span>
+      Top Options Found
+      <span style="font-size: 0.8rem; font-weight: 500; color: #999; margin-left: 4px;">
+        ({{ response.topOptionsFound?.length || 0 }} products researched)
+      </span>
+    </h3>
+
+    <div class="products-grid">
+      <div class="product-card"
+           *ngFor="let product of response.topOptionsFound"
+           [class.best]="product.id === response.finalRecommendation?.bestProduct?.id">
+
+        <!-- Product Image Area -->
+        <div class="product-image-area">
+          <div class="product-badges">
+            <span class="badge-best-overlay" *ngIf="product.id === response.finalRecommendation?.bestProduct?.id">
+              🏆 Best Pick
+            </span>
+            <span *ngIf="product.id !== response.finalRecommendation?.bestProduct?.id"></span>
+            <span class="platform-badge platform-amazon" *ngIf="product.platform === 'Amazon'">🛒 Amazon</span>
+            <span class="platform-badge platform-flipkart" *ngIf="product.platform === 'Flipkart'">🛍️ Flipkart</span>
+            <span class="platform-badge platform-mock" *ngIf="product.platform === 'Mock' || !product.platform">📋 Demo</span>
+          </div>
+          <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name"
+               (error)="onImageError($event)">
+          <div class="product-image-placeholder" *ngIf="!product.imageUrl">
+            <div class="placeholder-icon">{{ getCategoryIcon(product.category) }}</div>
+            <div class="placeholder-text">{{ product.brand }}</div>
+          </div>
+        </div>
+
+        <!-- Product Body -->
+        <div class="product-body">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-brand">by {{ product.brand }}</div>
+          <div class="product-price">{{ product.priceRange || formatPrice(product.price) }}</div>
+
+          <div class="discount-badge" *ngIf="product.discount">
+            🏷️ {{ product.discount }}
+          </div>
+
+          <div class="product-rating">
+            <span class="stars">{{ getStars(product.rating) }}</span>
+            <span class="rating-value">{{ product.rating }}/5</span>
+            <span *ngIf="product.reviewCount" style="font-size: 0.75rem; color: #999; margin-left: 4px;">
+              ({{ product.reviewCount | number }})
+            </span>
+          </div>
+
+          <div class="availability-badge" *ngIf="product.availability"
+               [style.color]="product.availability.includes('Stock') ? '#00b894' : '#e74c3c'">
+            {{ product.availability.includes('Stock') ? '✅' : '❌' }} {{ product.availability }}
+          </div>
+
+          <ul class="product-features">
+            <li *ngFor="let feature of product.keyFeatures?.slice(0, 4)">{{ feature }}</li>
+          </ul>
+
+          <div class="product-highlight" *ngIf="product.notableHighlights">
+            "{{ product.notableHighlights }}"
+          </div>
+
+          <div class="product-actions" *ngIf="product.sourceUrl">
+            <a [href]="product.sourceUrl" target="_blank" rel="noopener"
+               class="btn-buy"
+               [class.amazon]="product.platform === 'Amazon'"
+               [class.flipkart]="product.platform === 'Flipkart'"
+               [class.demo]="product.platform !== 'Amazon' && product.platform !== 'Flipkart'">
+              {{ product.platform === 'Amazon' ? '🛒 Buy on Amazon' :
+                 product.platform === 'Flipkart' ? '🛍️ Buy on Flipkart' : '🔗 View Product' }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Comparison Summary -->
+  <div class="result-card" *ngIf="response.comparisonSummary">
+    <h3>
+      <span class="card-icon" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">⚖️</span>
+      Comparison Summary
+    </h3>
+
+    <!-- Feature Comparison Table -->
+    <div class="comparison-table-wrapper" *ngIf="response.comparisonSummary.featureComparison">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th *ngFor="let product of response.topOptionsFound?.slice(0, 4)">
+              {{ product.name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let key of getFeatureKeys(response.comparisonSummary.featureComparison)">
+            <td><strong>{{ key }}</strong></td>
+            <td *ngFor="let val of response.comparisonSummary.featureComparison[key]">
+              {{ val }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pros & Cons -->
+    <div *ngIf="response.comparisonSummary.prosAndCons" style="margin-top: 24px;">
+      <div *ngFor="let key of getProsConsKeys(response.comparisonSummary.prosAndCons); let first = first"
+           [style.margin-top]="first ? '0' : '20px'">
+        <h4 style="font-size: 0.9rem; color: #555; margin-bottom: 10px; font-weight: 700;">{{ key }}</h4>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>✅ Pros</h4>
+            <ul>
+              <li *ngFor="let item of response.comparisonSummary.prosAndCons[key]?.slice(0, 3)">
+                <span>•</span> {{ item }}
+              </li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Cons</h4>
+            <ul>
+              <li><span>•</span> Limited availability in some regions</li>
+              <li><span>•</span> Price may vary by retailer</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="budget-insight" *ngIf="response.comparisonSummary.summary" style="margin-top: 20px;">
+      <span class="budget-insight-icon">📊</span>
+      <span>{{ response.comparisonSummary.summary }}</span>
+    </div>
+  </div>
+
+  <!-- 4. Budget Analysis -->
+  <div class="result-card" *ngIf="response.budgetAnalysis">
+    <h3>
+      <span class="card-icon" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">💰</span>
+      Budget Analysis
+    </h3>
+
+    <div class="budget-insight">
+      <span class="budget-insight-icon">💡</span>
+      <span>{{ response.budgetAnalysis.costVsValueInsight }}</span>
+    </div>
+
+    <div class="products-grid" *ngIf="response.budgetAnalysis.productsWithinBudget?.length">
+      <div class="product-card"
+           *ngFor="let product of response.budgetAnalysis.productsWithinBudget?.slice(0, 3)"
+           [class.best]="product.id === response.budgetAnalysis.bestValueProduct?.id">
+
+        <div class="product-image-area">
+          <div class="product-badges">
+            <span class="badge-best-overlay" *ngIf="product.id === response.budgetAnalysis.bestValueProduct?.id">
+              💎 Best Value
+            </span>
+            <span *ngIf="product.id !== response.budgetAnalysis.bestValueProduct?.id"></span>
+            <span class="platform-badge platform-amazon" *ngIf="product.platform === 'Amazon'">🛒</span>
+            <span class="platform-badge platform-flipkart" *ngIf="product.platform === 'Flipkart'">🛍️</span>
+          </div>
+          <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name"
+               (error)="onImageError($event)">
+          <div class="product-image-placeholder" *ngIf="!product.imageUrl">
+            <div class="placeholder-icon">{{ getCategoryIcon(product.category) }}</div>
+          </div>
+        </div>
+
+        <div class="product-body">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-brand">by {{ product.brand }}</div>
+          <div class="product-price">{{ formatPrice(product.price) }}</div>
+          <div class="discount-badge" *ngIf="product.discount">🏷️ {{ product.discount }}</div>
+          <div class="product-rating">
+            <span class="stars">{{ getStars(product.rating) }}</span>
+            <span class="rating-value">{{ product.rating }}/5</span>
+          </div>
+          <div class="product-actions" *ngIf="product.sourceUrl">
+            <a [href]="product.sourceUrl" target="_blank" rel="noopener"
+               class="btn-buy"
+               [class.amazon]="product.platform === 'Amazon'"
+               [class.flipkart]="product.platform === 'Flipkart'"
+               [class.demo]="product.platform !== 'Amazon' && product.platform !== 'Flipkart'">
+              View on {{ product.platform || 'Store' }} →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget-Friendly Alternatives -->
+    <div *ngIf="response.budgetAnalysis.cheaperAlternatives?.length" style="margin-top: 24px;">
+      <h4 style="color: #555; margin-bottom: 14px; font-size: 0.95rem; font-weight: 700;">
+        💡 Budget-Friendly Alternatives
+      </h4>
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let product of response.budgetAnalysis.cheaperAlternatives?.slice(0, 2)">
+          <div class="product-image-area">
+            <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name"
+                 (error)="onImageError($event)">
+            <div class="product-image-placeholder" *ngIf="!product.imageUrl">
+              <div class="placeholder-icon">{{ getCategoryIcon(product.category) }}</div>
+            </div>
+          </div>
+          <div class="product-body">
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">{{ formatPrice(product.price) }}</div>
+            <div class="product-rating">
+              <span class="stars">{{ getStars(product.rating) }}</span>
+            </div>
+            <div class="product-actions" *ngIf="product.sourceUrl">
+              <a [href]="product.sourceUrl" target="_blank" rel="noopener" class="btn-buy demo">
+                View →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Final Recommendation -->
+  <div class="result-card" *ngIf="response.finalRecommendation">
+    <h3>
+      <span class="card-icon" style="background: linear-gradient(135deg, #fff9e6, #fff3cd);">🏆</span>
+      AI Final Recommendation
+    </h3>
+
+    <div class="recommendation-hero" *ngIf="response.finalRecommendation.bestProduct">
+      <div class="rec-hero-content">
+        <div>
+          <div class="rec-trophy">🏆 &nbsp; TOP RECOMMENDATION</div>
+          <h4>{{ response.finalRecommendation.bestProduct.name }}</h4>
+          <div class="brand">by {{ response.finalRecommendation.bestProduct.brand }}</div>
+          <div class="price">
+            {{ response.finalRecommendation.bestProduct.priceRange ||
+               formatPrice(response.finalRecommendation.bestProduct.price) }}
+          </div>
+
+          <div *ngIf="response.finalRecommendation.bestProduct.discount"
+               style="font-size: 0.82rem; color: #a5d6a7; font-weight: 600; margin-bottom: 10px;">
+            🏷️ {{ response.finalRecommendation.bestProduct.discount }}
+          </div>
+
+          <div class="product-rating" style="margin-bottom: 14px;">
+            <span class="stars" style="color: #ffd700; font-size: 1rem;">
+              {{ getStars(response.finalRecommendation.bestProduct.rating) }}
+            </span>
+            <span style="color: white; font-weight: 700; font-size: 0.95rem;">
+              {{ response.finalRecommendation.bestProduct.rating }}/5
+            </span>
+            <span *ngIf="response.finalRecommendation.bestProduct.reviewCount"
+                  style="color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-left: 6px;">
+              ({{ response.finalRecommendation.bestProduct.reviewCount | number }} reviews)
+            </span>
+          </div>
+
+          <div *ngIf="response.finalRecommendation.bestProduct.availability"
+               style="font-size: 0.82rem; color: #a5d6a7; margin-bottom: 16px;">
+            ✅ {{ response.finalRecommendation.bestProduct.availability }}
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a *ngIf="response.finalRecommendation.bestProduct.sourceUrl"
+               [href]="response.finalRecommendation.bestProduct.sourceUrl"
+               target="_blank" rel="noopener"
+               class="btn-buy"
+               style="display: inline-flex; padding: 11px 24px; border-radius: 25px; font-size: 0.9rem; font-weight: 700; text-decoration: none; color: white; align-items: center; gap: 6px;"
+               [style.background]="response.finalRecommendation.bestProduct.platform === 'Amazon' ? 'linear-gradient(135deg, #ff9900, #e68900)' :
+                                   response.finalRecommendation.bestProduct.platform === 'Flipkart' ? 'linear-gradient(135deg, #2874f0, #1a5dc8)' :
+                                   'linear-gradient(135deg, #00b894, #00a381)'">
+              {{ response.finalRecommendation.bestProduct.platform === 'Amazon' ? '🛒 Buy on Amazon' :
+                 response.finalRecommendation.bestProduct.platform === 'Flipkart' ? '🛍️ Buy on Flipkart' : '🔗 View Product' }}
+            </a>
+          </div>
+
+          <div class="rec-features-box">
+            <div class="feat-title">KEY FEATURES</div>
+            <ul>
+              <li *ngFor="let f of response.finalRecommendation.bestProduct.keyFeatures?.slice(0, 5)">
+                {{ f }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="reason">
+            <strong>Why this is the best choice:</strong><br>
+            {{ response.finalRecommendation.reasonForRecommendation }}
+          </div>
+        </div>
+
+        <!-- Product Image in Recommendation -->
+        <div class="rec-hero-image">
+          <img *ngIf="response.finalRecommendation.bestProduct.imageUrl"
+               [src]="response.finalRecommendation.bestProduct.imageUrl"
+               [alt]="response.finalRecommendation.bestProduct.name"
+               (error)="onImageError($event)">
+          <div class="rec-placeholder-icon" *ngIf="!response.finalRecommendation.bestProduct.imageUrl">
+            {{ getCategoryIcon(response.finalRecommendation.bestProduct.category) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Decision Banner -->
+    <div class="final-decision">
+      <span class="final-decision-icon">🎯</span>
+      <span>{{ response.finalRecommendation.finalDecision }}</span>
+    </div>
+
+    <!-- Alternative Options -->
+    <div *ngIf="response.finalRecommendation.alternativeOptions?.length" style="margin-top: 24px;">
+      <h4 style="color: #555; margin-bottom: 14px; font-size: 0.95rem; font-weight: 700;">
+        🔄 Alternative Options
+      </h4>
+      <div class="products-grid">
+        <div class="product-card"
+             *ngFor="let product of response.finalRecommendation.alternativeOptions">
+
+          <div class="product-image-area">
+            <div class="product-badges">
+              <span class="badge badge-alt">Alternative</span>
+              <span class="platform-badge platform-amazon" *ngIf="product.platform === 'Amazon'">🛒</span>
+              <span class="platform-badge platform-flipkart" *ngIf="product.platform === 'Flipkart'">🛍️</span>
+            </div>
+            <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name"
+                 (error)="onImageError($event)">
+            <div class="product-image-placeholder" *ngIf="!product.imageUrl">
+              <div class="placeholder-icon">{{ getCategoryIcon(product.category) }}</div>
+            </div>
+          </div>
+
+          <div class="product-body">
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-brand">by {{ product.brand }}</div>
+            <div class="product-price">{{ product.priceRange || formatPrice(product.price) }}</div>
+            <div class="discount-badge" *ngIf="product.discount">🏷️ {{ product.discount }}</div>
+            <div class="product-rating">
+              <span class="stars">{{ getStars(product.rating) }}</span>
+              <span class="rating-value">{{ product.rating }}/5</span>
+            </div>
+            <ul class="product-features">
+              <li *ngFor="let f of product.keyFeatures?.slice(0, 3)">{{ f }}</li>
+            </ul>
+            <div class="product-actions" *ngIf="product.sourceUrl">
+              <a [href]="product.sourceUrl" target="_blank" rel="noopener"
+                 class="btn-buy"
+                 [class.amazon]="product.platform === 'Amazon'"
+                 [class.flipkart]="product.platform === 'Flipkart'"
+                 [class.demo]="product.platform !== 'Amazon' && product.platform !== 'Flipkart'">
+                {{ product.platform === 'Amazon' ? '🛒 Amazon' :
+                   product.platform === 'Flipkart' ? '🛍️ Flipkart' : '🔗 View' }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

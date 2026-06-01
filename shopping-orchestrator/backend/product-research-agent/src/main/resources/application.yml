@@ -1,0 +1,54 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-research-agent
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+# Amazon Product Advertising API (PA-API 5.0) credentials
+# Register at: https://affiliate-program.amazon.in/
+amazon:
+  paapi:
+    access-key: YOUR_AMAZON_ACCESS_KEY
+    secret-key: YOUR_AMAZON_SECRET_KEY
+    partner-tag: YOUR_ASSOCIATE_TAG
+    host: webservices.amazon.in
+    region: eu-west-1
+    enabled: false   # Set to true once you have valid credentials
+
+# Flipkart Affiliate API credentials
+# Register at: https://affiliate.flipkart.com/
+flipkart:
+  affiliate:
+    token: YOUR_FLIPKART_AFFILIATE_TOKEN
+    affiliate-id: YOUR_FLIPKART_AFFILIATE_ID
+    base-url: https://affiliate-api.flipkart.io/affiliate
+    enabled: false   # Set to true once you have valid credentials
+
+# RapidAPI - Real-time Amazon/Flipkart data (alternative)
+# Register at: https://rapidapi.com/
+rapidapi:
+  key: YOUR_RAPIDAPI_KEY
+  amazon:
+    host: real-time-amazon-data.p.rapidapi.com
+    enabled: false   # Set to true once you have valid credentials
+  flipkart:
+    host: real-time-flipkart-api.p.rapidapi.com
+    enabled: false   # Set to true once you have valid credentials
+
+logging:
+  level:
+    com.shopping.research: DEBUG

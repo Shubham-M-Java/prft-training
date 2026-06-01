@@ -1,0 +1,75 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: orchestrator-service
+          uri: lb://orchestrator-service
+          predicates:
+            - Path=/api/orchestrator/**
+          filters:
+            - StripPrefix=0
+
+        - id: product-research-agent
+          uri: lb://product-research-agent
+          predicates:
+            - Path=/api/research/**
+          filters:
+            - StripPrefix=0
+
+        - id: comparison-agent
+          uri: lb://comparison-agent
+          predicates:
+            - Path=/api/comparison/**
+          filters:
+            - StripPrefix=0
+
+        - id: budget-agent
+          uri: lb://budget-agent
+          predicates:
+            - Path=/api/budget/**
+          filters:
+            - StripPrefix=0
+
+        - id: recommendation-agent
+          uri: lb://recommendation-agent
+          predicates:
+            - Path=/api/recommendation/**
+          filters:
+            - StripPrefix=0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
